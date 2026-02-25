@@ -53,7 +53,6 @@ export type AllAppConfig = AppConfig & {
 	ldapSoftDeleteUsers: boolean;
 	// Webhooks
 	webhookUrl: string;
-	webhookSecret: string;
 	webhookEvents: string;
 };
 

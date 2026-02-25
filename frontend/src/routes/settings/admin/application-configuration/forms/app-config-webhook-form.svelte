@@ -1,7 +1,9 @@
 <script lang="ts">
 	import { openConfirmDialog } from '$lib/components/confirm-dialog';
 	import FormInput from '$lib/components/form/form-input.svelte';
+	import SearchableMultiSelect from '$lib/components/form/searchable-multi-select.svelte';
 	import { Button } from '$lib/components/ui/button';
+	import { Label } from '$lib/components/ui/label';
 	import { m } from '$lib/paraglide/messages';
 	import AppConfigService from '$lib/services/app-config-service';
 	import appConfigStore from '$lib/stores/application-configuration-store';
@@ -25,11 +27,46 @@
 
 	const formSchema = z.object({
 		webhookUrl: z.url().or(z.literal('')).optional(),
-		webhookSecret: z.string().optional(),
 		webhookEvents: z.string().optional()
 	});
 
 	let { inputs, ...form } = $derived(createForm(formSchema, appConfig));
+
+	const auditLogEventsList = [
+		'SIGN_IN',
+		'TOKEN_SIGN_IN',
+		'ACCOUNT_CREATED',
+		'CLIENT_AUTHORIZATION',
+		'NEW_CLIENT_AUTHORIZATION',
+		'DEVICE_CODE_AUTHORIZATION',
+		'NEW_DEVICE_CODE_AUTHORIZATION',
+		'PASSKEY_ADDED',
+		'PASSKEY_REMOVED'
+	] as const;
+
+	function getEventLabel(event: string) {
+		switch (event) {
+			case 'SIGN_IN': return m.webhook_event_SIGN_IN();
+			case 'TOKEN_SIGN_IN': return m.webhook_event_TOKEN_SIGN_IN();
+			case 'ACCOUNT_CREATED': return m.webhook_event_ACCOUNT_CREATED();
+			case 'CLIENT_AUTHORIZATION': return m.webhook_event_CLIENT_AUTHORIZATION();
+			case 'NEW_CLIENT_AUTHORIZATION': return m.webhook_event_NEW_CLIENT_AUTHORIZATION();
+			case 'DEVICE_CODE_AUTHORIZATION': return m.webhook_event_DEVICE_CODE_AUTHORIZATION();
+			case 'NEW_DEVICE_CODE_AUTHORIZATION': return m.webhook_event_NEW_DEVICE_CODE_AUTHORIZATION();
+			case 'PASSKEY_ADDED': return m.webhook_event_PASSKEY_ADDED();
+			case 'PASSKEY_REMOVED': return m.webhook_event_PASSKEY_REMOVED();
+			default: return event;
+		}
+	}
+
+	const auditLogItems = auditLogEventsList.map(event => ({ value: event, label: getEventLabel(event) }));
+	
+	let selectedEvents = $state(appConfig.webhookEvents ? appConfig.webhookEvents.split(',') : []);
+
+	function onSelectEvents(selected: string[]) {
+		selectedEvents = selected;
+		$inputs.webhookEvents.value = selected.join(',');
+	}
 
 	async function onSubmit() {
 		const data = form.validate();
@@ -82,18 +119,22 @@
 <form onsubmit={preventDefault(onSubmit)}>
 	<fieldset disabled={$appConfigStore.uiConfigDisabled}>
 		<h4 class="mb-4 text-lg font-semibold">{m.webhook_configuration()}</h4>
-		<div class="mt-4 grid grid-cols-1 items-start gap-5 md:grid-cols-2">
+		<div class="mt-4 grid grid-cols-1 items-start gap-5">
 			<FormInput label={m.webhook_url()} bind:input={$inputs.webhookUrl} />
-			<FormInput label={m.webhook_secret()} type="password" bind:input={$inputs.webhookSecret} />
 		</div>
 		<div class="mt-5">
-			<FormInput
-				label={m.webhook_events()}
-				bind:input={$inputs.webhookEvents}
-			/>
-			<p class="mt-1 text-sm text-muted-foreground">
+			<Label>{m.webhook_events()}</Label>
+			<p class="mt-1 mb-3 text-sm text-muted-foreground">
 				{m.webhook_events_description()}
 			</p>
+			<div>
+				<SearchableMultiSelect 
+					id="webhook-events-select" 
+					items={auditLogItems} 
+					selectedItems={selectedEvents} 
+					onSelect={onSelectEvents} 
+				/>
+			</div>
 		</div>
 	</fieldset>
 	<div class="mt-8 flex flex-wrap justify-end gap-3">

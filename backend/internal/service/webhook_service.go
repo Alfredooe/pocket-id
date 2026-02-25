@@ -3,9 +3,6 @@ package service
 import (
 	"bytes"
 	"context"
-	"crypto/hmac"
-	"crypto/sha256"
-	"encoding/hex"
 	"encoding/json"
 	"fmt"
 	"log/slog"
@@ -44,8 +41,9 @@ type webhookEmbedField struct {
 }
 
 type webhookPayload struct {
-	Content string         `json:"content"`
-	Embeds  []webhookEmbed `json:"embeds"`
+	Content     string         `json:"content,omitempty"`
+	Embeds      []webhookEmbed `json:"embeds,omitempty"`      // Discord
+	Attachments []webhookEmbed `json:"attachments,omitempty"` // Slack
 }
 
 // SendEvent sends a webhook notification for an audit log event.
@@ -71,7 +69,6 @@ func (s *WebhookService) SendEvent(ctx context.Context, auditLog model.AuditLog)
 	location := formatLocation(auditLog.Country, auditLog.City)
 
 	payload := webhookPayload{
-		Content: fmt.Sprintf("**%s** – %s", auditLog.Event, auditLog.Username),
 		Embeds: []webhookEmbed{
 			{
 				Title: formatEventTitle(string(auditLog.Event)),
@@ -111,13 +108,12 @@ func (s *WebhookService) SendTestWebhook(ctx context.Context) error {
 	}
 
 	payload := webhookPayload{
-		Content: "🔔 **Test Webhook from Pocket ID**",
 		Embeds: []webhookEmbed{
 			{
 				Title: "Test Webhook",
 				Color: 5814783,
 				Fields: []webhookEmbedField{
-					{Name: "Status", Value: "✅ Connection successful", Inline: false},
+					{Name: "Status", Value: "Connection successful", Inline: false},
 					{Name: "Source", Value: "Pocket ID", Inline: true},
 				},
 				Timestamp: time.Now().UTC().Format(time.RFC3339),
@@ -129,7 +125,16 @@ func (s *WebhookService) SendTestWebhook(ctx context.Context) error {
 }
 
 func (s *WebhookService) sendPayload(ctx context.Context, webhookURL string, payload webhookPayload) error {
-	body, err := json.Marshal(payload)
+	var finalPayload any
+	if strings.Contains(webhookURL, "hooks.slack.com") {
+		payload.Attachments = payload.Embeds
+		payload.Embeds = nil
+		finalPayload = payload
+	} else {
+		finalPayload = payload
+	}
+
+	body, err := json.Marshal(finalPayload)
 	if err != nil {
 		return fmt.Errorf("failed to marshal webhook payload: %w", err)
 	}
@@ -140,16 +145,6 @@ func (s *WebhookService) sendPayload(ctx context.Context, webhookURL string, pay
 	}
 
 	req.Header.Set("Content-Type", "application/json")
-
-	// Sign the payload with HMAC-SHA256 if a secret is configured
-	cfg := s.appConfigService.GetDbConfig()
-	secret := cfg.WebhookSecret.Value
-	if secret != "" {
-		mac := hmac.New(sha256.New, []byte(secret))
-		mac.Write(body)
-		signature := hex.EncodeToString(mac.Sum(nil))
-		req.Header.Set("X-Webhook-Signature", signature)
-	}
 
 	resp, err := s.httpClient.Do(req)
 	if err != nil {

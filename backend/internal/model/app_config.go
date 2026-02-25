@@ -62,7 +62,6 @@ type AppConfig struct {
 	EmailVerificationEnabled                   AppConfigVariable `key:"emailVerificationEnabled,public"` // Public
 	// Webhooks
 	WebhookUrl    AppConfigVariable `key:"webhookUrl"`
-	WebhookSecret AppConfigVariable `key:"webhookSecret,sensitive"`
 	WebhookEvents AppConfigVariable `key:"webhookEvents"`
 	// LDAP
 	LdapEnabled                        AppConfigVariable `key:"ldapEnabled,public"` // Public

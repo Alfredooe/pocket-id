@@ -68,6 +68,19 @@ func (s *AuditLogService) Create(ctx context.Context, event model.AuditLogEvent,
 		span := trace.SpanFromContext(ctx)
 		//nolint:contextcheck
 		innerCtx := trace.ContextWithSpan(context.Background(), span)
+
+		// Fetch user details if user ID is present
+		if auditLog.UserID != "" && auditLog.Username == "" {
+			var user model.User
+			if err := s.db.WithContext(innerCtx).Select("username", "email").First(&user, "id = ?", auditLog.UserID).Error; err == nil {
+				if user.Email != nil && *user.Email != "" {
+					auditLog.Username = *user.Email
+				} else {
+					auditLog.Username = user.Username
+				}
+			}
+		}
+
 		s.webhookService.SendEvent(innerCtx, auditLog)
 	}()
 

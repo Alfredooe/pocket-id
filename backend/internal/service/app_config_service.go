@@ -87,7 +87,6 @@ func (s *AppConfigService) getDefaultDbConfig() *model.AppConfig {
 		EmailVerificationEnabled:                   model.AppConfigVariable{Value: "false"},
 		// Webhooks
 		WebhookUrl:    model.AppConfigVariable{},
-		WebhookSecret: model.AppConfigVariable{},
 		WebhookEvents: model.AppConfigVariable{},
 		// LDAP
 		LdapEnabled:                        model.AppConfigVariable{Value: "false"},
