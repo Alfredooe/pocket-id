@@ -123,7 +123,7 @@
 			<FormInput label={m.webhook_url()} bind:input={$inputs.webhookUrl} />
 		</div>
 		<div class="mt-5">
-			<Label>{m.webhook_events()}</Label>
+			<Label for="webhook-events-select">{m.webhook_events()}</Label>
 			<p class="mt-1 mb-3 text-sm text-muted-foreground">
 				{m.webhook_events_description()}
 			</p>
