@@ -65,10 +65,7 @@ func (s *AuditLogService) Create(ctx context.Context, event model.AuditLogEvent,
 
 	// Dispatch webhook notification asynchronously
 	go func() {
-		span := trace.SpanFromContext(ctx)
-		//nolint:contextcheck
-		innerCtx := trace.ContextWithSpan(context.Background(), span)
-
+		innerCtx := context.WithoutCancel(ctx)
 		// Fetch user details if user ID is present
 		if auditLog.UserID != "" && auditLog.Username == "" {
 			var user model.User
