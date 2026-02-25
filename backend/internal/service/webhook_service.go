@@ -84,7 +84,7 @@ func (s *WebhookService) SendEvent(ctx context.Context, auditLog model.AuditLog)
 		},
 	}
 
-	// Add any extra data fields from the audit log
+	// Add any extra data fields from the audit log.
 	for k, v := range auditLog.Data {
 		payload.Embeds[0].Fields = append(payload.Embeds[0].Fields, webhookEmbedField{
 			Name:   k,
