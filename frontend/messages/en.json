@@ -521,5 +521,17 @@
 	"mark_as_verified": "Mark as verified",
 	"email_verification_sent": "Verification email sent successfully.",
 	"emails_verified_by_default": "Emails verified by default",
-	"emails_verified_by_default_description": "When enabled, users' email addresses will be marked as verified by default upon signup or when their email address is changed."
+	"emails_verified_by_default_description": "When enabled, users' email addresses will be marked as verified by default upon signup or when their email address is changed.",
+	"webhooks": "Webhooks",
+	"configure_webhooks_description": "Send HTTP POST notifications to external services when audit log events occur.",
+	"webhook_configuration": "Webhook Configuration",
+	"webhook_url": "Webhook URL",
+	"webhook_secret": "Webhook Secret",
+	"webhook_events": "Webhook Events",
+	"webhook_events_description": "Comma-separated list of events to notify on (e.g. SIGN_IN, ACCOUNT_CREATED). Leave blank for all events.",
+	"webhook_configuration_updated_successfully": "Webhook configuration updated successfully",
+	"send_test_webhook": "Send test webhook",
+	"test_webhook_sent_successfully": "Test webhook sent successfully.",
+	"failed_to_send_test_webhook": "Failed to send test webhook. Check the server logs for more information.",
+	"save_changes_before_test_webhook": "You have to save the changes before sending a test webhook. Do you want to save now?"
 }

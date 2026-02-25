@@ -55,4 +55,7 @@ type AppConfigUpdateDto struct {
 	EmailLoginNotificationEnabled              string `json:"emailLoginNotificationEnabled" binding:"required"`
 	EmailApiKeyExpirationEnabled               string `json:"emailApiKeyExpirationEnabled" binding:"required"`
 	EmailVerificationEnabled                   string `json:"emailVerificationEnabled" binding:"required"`
+	WebhookUrl                                 string `json:"webhookUrl" binding:"omitempty,url"`
+	WebhookSecret                              string `json:"webhookSecret"`
+	WebhookEvents                              string `json:"webhookEvents"`
 }

@@ -51,6 +51,10 @@ export type AllAppConfig = AppConfig & {
 	ldapAttributeGroupName: string;
 	ldapAdminGroupName: string;
 	ldapSoftDeleteUsers: boolean;
+	// Webhooks
+	webhookUrl: string;
+	webhookSecret: string;
+	webhookEvents: string;
 };
 
 export type AppConfigRawResponse = {

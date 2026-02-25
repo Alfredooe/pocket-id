@@ -18,14 +18,16 @@ type AuditLogService struct {
 	appConfigService *AppConfigService
 	emailService     *EmailService
 	geoliteService   *GeoLiteService
+	webhookService   *WebhookService
 }
 
-func NewAuditLogService(db *gorm.DB, appConfigService *AppConfigService, emailService *EmailService, geoliteService *GeoLiteService) *AuditLogService {
+func NewAuditLogService(db *gorm.DB, appConfigService *AppConfigService, emailService *EmailService, geoliteService *GeoLiteService, webhookService *WebhookService) *AuditLogService {
 	return &AuditLogService{
 		db:               db,
 		appConfigService: appConfigService,
 		emailService:     emailService,
 		geoliteService:   geoliteService,
+		webhookService:   webhookService,
 	}
 }
 
@@ -60,6 +62,14 @@ func (s *AuditLogService) Create(ctx context.Context, event model.AuditLogEvent,
 		slog.Error("Failed to create audit log", "error", err)
 		return model.AuditLog{}, false
 	}
+
+	// Dispatch webhook notification asynchronously
+	go func() {
+		span := trace.SpanFromContext(ctx)
+		//nolint:contextcheck
+		innerCtx := trace.ContextWithSpan(context.Background(), span)
+		s.webhookService.SendEvent(innerCtx, auditLog)
+	}()
 
 	return auditLog, true
 }
