@@ -132,7 +132,7 @@ test.describe('Update webhook configuration', () => {
 		await page.getByLabel('Webhook URL').fill('https://example.com/webhook');
 
 		await page.getByRole('combobox', { name: 'Webhook Events' }).click();
-		await page.getByRole('option', { name: 'Sign In' }).click();
+		await page.getByRole('option', { name: 'Sign In', exact: true }).click();
 		await page.getByRole('option', { name: 'Account Created' }).click();
 
 		await page.getByRole('button', { name: 'Save' }).nth(2).click();
@@ -148,7 +148,7 @@ test.describe('Update webhook configuration', () => {
 
 		await page.getByRole('combobox', { name: 'Webhook Events' }).click();
 
-		await expect(page.getByRole('option', { name: 'Sign In' })).toBeChecked();
+		await expect(page.getByRole('option', { name: 'Sign In', exact: true })).toBeChecked();
 		await expect(page.getByRole('option', { name: 'Account Created' })).toBeChecked();
 	});
 });
